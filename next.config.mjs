@@ -1,20 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  webpack(config, { isServer, dev }) {
-
+  webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
-      use: ["@svgr/webpack"]
+      use: ["@svgr/webpack"],
+    });
+
+    config.module.rules.push({
+      test: /\.glsl$/,
+      type: "asset/source",
     });
 
     config.experiments = {
@@ -22,28 +22,16 @@ const nextConfig = {
       layers: true,
     };
 
-    // Handle Mapbox GL - exclude from transpilation as per Mapbox docs
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-      };
-      
-      // Exclude mapbox-gl from babel/transpilation
-      config.module.rules.forEach((rule) => {
-        if (rule.use && Array.isArray(rule.use)) {
-          rule.use.forEach((use) => {
-            if (use.loader && use.loader.includes('babel-loader')) {
-              if (!use.options) use.options = {};
-              if (!use.options.ignore) use.options.ignore = [];
-              use.options.ignore.push('./node_modules/mapbox-gl/dist/mapbox-gl.js');
-            }
-          });
-        }
-      });
-    }
-
     return config;
+  },
+  async rewrites() {
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+    return [
+      {
+        source: "/api/backend/:path*",
+        destination: `${backendUrl}/:path*`,
+      },
+    ];
   },
 };
 

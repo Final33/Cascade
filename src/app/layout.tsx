@@ -1,78 +1,39 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { Toaster } from "@/components/ui/toaster";
-import { headers } from "next/headers";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { createSupabaseServerComponentClient } from "@/lib/supabase/server-client";
-import dynamic from "next/dynamic";
-import { UserProvider } from "@/context/UserContext";
-import "./prosemirror.css";
-// Onborda
-import { Onborda, OnbordaProvider } from "onborda";
-import { steps } from "@/lib/steps";
 
-import Metrics from "./metrics";
-import { TooltipProvider } from "@/components/ui/tooltip";
-// import { IdeaProvider } from "@/context/IdeaContext";
-// import { DocumentProvider } from "@/context/DocumentContext";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
-import CustomCard from "@/components/CustomCard";
-import 'katex/dist/katex.min.css';
-const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
-  title: "Clusion",
+  title: "Cascade | Real-Time Pandemic Outbreak Predictor",
   description:
-    "The debate ecosystem.",
+    "Simulate pandemic spread across the global flight network. Optimize vaccine deployment, travel restrictions, and field hospitals to minimize casualties using Monte Carlo Tree Search.",
+  keywords: [
+    "pandemic simulation",
+    "SEIR model",
+    "MCTS optimization",
+    "disease outbreak",
+    "epidemic modeling",
+  ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
-  const CrispWithNoSSR = dynamic(() => import("@/components/Crisp"));
-  const headersList = headers();
-  const domain = headersList.get("host") || "";
-  const fullUrl = headersList.get("referer") || "";
-
-  const supabase = createSupabaseServerComponentClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const { data } = await supabase
-    .from("users")
-    .select("email")
-    .eq("uid", session?.user.id);
-
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <head>
-        {/* <CrispWithNoSSR /> */}
-        <GoogleAnalytics gaId="G-L3RSSDZ4GH" />
-      </head>
-      <body className={inter.className}>
-        <TooltipProvider>
-          <UserProvider>
-            <Toaster />
-            <OnbordaProvider>
-              <Onborda
-                steps={steps}
-                cardComponent={CustomCard}
-                shadowOpacity="0.8"
-              >
-                <div className="md:hidden sm:flex bg-primary text-white text-center p-2">
-                  For the best experience and access to all features,
-                  please use a desktop.
-                </div>
-                {children}
-                <SpeedInsights />
-              </Onborda>
-            </OnbordaProvider>
-          </UserProvider>
-        </TooltipProvider>
-
-        <Metrics userEmail={session?.user.email ?? ""} />
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} ${jetbrains.variable} font-sans antialiased`}>
+        {children}
       </body>
     </html>
   );
